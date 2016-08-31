@@ -17,6 +17,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.pierry.simpletoast.SimpleToast;
+import com.pixplicity.easyprefs.library.Prefs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,12 +33,11 @@ import static com.ryletech.vote.AppConfig.TAG;
 public class LoginActivity extends AppCompatActivity implements OnClickListener {
 
     ProgressDialog progressDialog;
-
+    Button createAccountButton;
+    Button signInButton;
     // UI references.
     private EditText mIdNumber;
     private EditText mPasswordView;
-    Button createAccountButton;
-    Button signInButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +116,12 @@ assignViews();
                 showProgress(false);
 
                 switch (response){
+
+
                     case "0":
+
+                        Prefs.putString(ID_NUMBER, idNumber);
+
                         SimpleToast.ok(getBaseContext(),"Login Success");
 
                         startActivity(new Intent(LoginActivity.this,MainActivity.class));
@@ -146,7 +151,8 @@ assignViews();
                 Map<String, String> params = new HashMap<>();
                 params.put(ID_NUMBER, idNumber);
                 params.put(PASSWORD, password);
-                return params;            }
+                return params;
+            }
         };
 
         AppController.getInstance().addToRequestQueue(request);
@@ -161,7 +167,6 @@ assignViews();
      * Shows the progress UI and hides the login form.
      */
     private void showProgress(final boolean show) {
-        if(progressDialog!=null) {
             if (show) {
                 progressDialog = new ProgressDialog(LoginActivity.this);
                 progressDialog.setMessage("Authenticating...");
@@ -172,7 +177,6 @@ assignViews();
                     progressDialog.dismiss();
                 }
             }
-        }
     }
 
     @Override

@@ -37,6 +37,7 @@ public final class AppConfig {
     public static final String ID_NUMBER = "id_number";
     public static final String PASSWORD = "password";
     public static final String GENDER = "gender";
+    public static final String EMAIL_ADDRESS = "email_address";
     public static final String PHONE_NUMBER = "phone_number";
 
     //    Keys for orders
@@ -70,15 +71,23 @@ public final class AppConfig {
 
     //    keys for product
     public static final String PRODUCT_ID = "product_id";
-    public static final String PRODUCT_NAME = "product_name";
-    public static final String PRODUCT_PRICE = "product_price";
+    public static final String COUNTY_NAME = "county_name";
+    public static final String PRESIDENT_NAME = "president_name";
+    public static final String GOVERNOR_NAME = "governor_name";
+    public static final String SENATOR_NAME = "senator_name";
+    public static final String WOMAN_REP_NAME = "woman_rep_name";
     //    preferences
     public static final String FIRST_RUN = "first_run";
 //    private static final String SERVER_URL = "https://orders-kevynashinski.c9users.io/";
-private static final String SERVER_URL = "http://192.168.58.1/orders/";
+private static final String SERVER_URL = "http://192.168.58.1/opinionpolls/";
     //    private static final String SERVER_URL = "http://ecea9b2e.ngrok.io/orders/";
     public static final String LOGIN_URL = SERVER_URL + "auth.php";
     public static final String REGISTER_URL = SERVER_URL + "register.php";
     public static final String VOTE_URL = SERVER_URL + "vote.php";
+    public static final String PRESIDENTS_URL = SERVER_URL + "presidents.php";
+    public static final String GOVERNORS_URL = SERVER_URL + "governors.php";
+    public static final String SENATORS_URL = SERVER_URL + "senators.php";
+    public static final String WOMEN_REPS_URL = SERVER_URL + "womenreps.php";
+    public static final String COUNTIES_URL = SERVER_URL + "counties.php";
     public static final String USER_ACCOUNTS_URL = SERVER_URL + "user_account.php";
 }
