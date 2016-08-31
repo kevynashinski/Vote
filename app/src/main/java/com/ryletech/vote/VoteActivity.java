@@ -39,15 +39,20 @@ import fr.ganfra.materialspinner.MaterialSpinner;
 import static com.ryletech.vote.AppConfig.COUNTIES_URL;
 import static com.ryletech.vote.AppConfig.COUNTY_NAME;
 import static com.ryletech.vote.AppConfig.GOVERNORS_URL;
+import static com.ryletech.vote.AppConfig.GOVERNOR_NAME;
 import static com.ryletech.vote.AppConfig.ID_NUMBER;
 import static com.ryletech.vote.AppConfig.PRESIDENTS_URL;
+import static com.ryletech.vote.AppConfig.PRESIDENT_NAME;
 import static com.ryletech.vote.AppConfig.SENATORS_URL;
+import static com.ryletech.vote.AppConfig.SENATOR_NAME;
 import static com.ryletech.vote.AppConfig.TAG;
+import static com.ryletech.vote.AppConfig.VOTE_URL;
+import static com.ryletech.vote.AppConfig.WOMAN_REP_NAME;
 import static com.ryletech.vote.AppConfig.WOMEN_REPS_URL;
 
 public class VoteActivity extends AppCompatActivity implements View.OnClickListener {
 
-    MaterialSpinner spinnerPresident, spinnerGovernor, spinnerSenator, spinnerWomenRep, spinnerMP, spinnerCounties;
+    MaterialSpinner spinnerPresident, spinnerGovernor, spinnerSenator, spinnerWomenRep, spinnerCounties;
     Button voteClear, submitVoteButton;
     ProgressDialog progressDialog;
     private CoordinatorLayout votesCoordinatorLayout;
@@ -427,66 +432,77 @@ public class VoteActivity extends AppCompatActivity implements View.OnClickListe
 
                             @Override
                             public void onSheetItemSelected(@NonNull BottomSheet bottomSheet, MenuItem menuItem) {
-                                if (menuItem.getActionView().getId() == DISMISS_EVENT_BUTTON_POSITIVE) {
-                                    SimpleToast.info(getBaseContext(), "Ready to roll");
-                                }
+
                             }
 
                             @Override
                             public void onSheetDismissed(@NonNull BottomSheet bottomSheet, @DismissEvent int i) {
+                                switch (i) {
+                                    case DISMISS_EVENT_BUTTON_POSITIVE:
 
+                                        final String county, presidentName, senatorName, governorName, womanRepName;
+
+                                        county = spinnerCounties.getSelectedItem().toString();
+                                        presidentName = spinnerPresident.getSelectedItem().toString();
+                                        governorName = spinnerGovernor.getSelectedItem().toString();
+                                        senatorName = spinnerSenator.getSelectedItem().toString();
+                                        womanRepName = spinnerWomenRep.getSelectedItem().toString();
+
+                                        if (new InternetConnection(getBaseContext()).isInternetAvailable()) {
+
+                                            showProgress(true);
+                                            StringRequest request = new StringRequest(Request.Method.POST, VOTE_URL, new Response.Listener<String>() {
+                                                @Override
+                                                public void onResponse(String response) {
+                                                    Log.i(TAG, "onResponse: Response= " + response);
+
+                                                    showProgress(false);
+                                                    switch (response) {
+                                                        case "0":
+                                                            SimpleToast.ok(getBaseContext(), "Cast vote success");
+                                                            break;
+                                                        case "1":
+                                                            SimpleToast.warning(getBaseContext(), "Error while casting your vote");
+                                                            break;
+                                                        case "3":
+                                                            SimpleToast.error(getBaseContext(), "Server Error, try again");
+                                                            break;
+                                                    }
+
+                                                }
+                                            }, new Response.ErrorListener() {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+
+                                                    showProgress(false);
+                                                    Log.e(TAG, "onErrorResponse: Error = " + error.getMessage());
+
+                                                    SimpleToast.error(getBaseContext(), "Network Failure, try again");
+                                                }
+                                            }) {
+                                                @Override
+                                                protected Map<String, String> getParams() throws AuthFailureError {
+                                                    Map<String, String> params = new HashMap<>();
+                                                    params.put(COUNTY_NAME, county);
+                                                    params.put(GOVERNOR_NAME, governorName);
+                                                    params.put(SENATOR_NAME, senatorName);
+                                                    params.put(PRESIDENT_NAME, presidentName);
+                                                    params.put(WOMAN_REP_NAME, womanRepName);
+                                                    return params;
+                                                }
+                                            };
+
+                                            AppController.getInstance().addToRequestQueue(request);
+                                        } else {
+//    show Wireless Settings
+//            SimpleToast.warning(getBaseContext(),"Internet Connection Error");
+                                            showWirelessSettings();
+                                        }
+                                        break;
+                                }
                             }
                         })
                         .show();
-
-//final String county,presidentName,senatorName,governorName,womanRepName;
-//                county=spinnerCounties.getSelectedItem().toString();
-//                presidentName=spinnerPresident.getSelectedItem().toString();
-//                governorName = spinnerGovernor.getSelectedItem().toString();
-//                senatorName = spinnerSenator.getSelectedItem().toString();
-//                womanRepName = spinnerWomenRep.getSelectedItem().toString();
-//
-//                if (new InternetConnection(getBaseContext()).isInternetAvailable()) {
-//                    StringRequest request = new StringRequest(Request.Method.POST,VOTE_URL, new Response.Listener<String>() {
-//                        @Override
-//                        public void onResponse(String response) {
-//                            Log.i(TAG, "onResponse: Response= " + response);
-//
-//                            try {
-//                                parseSenatorsResult(new JSONArray(response));
-//                            } catch (JSONException e) {
-//                                e.printStackTrace();
-//                                Log.e(TAG, "onResponse: Error while converting string to json =" + e.getMessage());
-//                            }
-//
-//                        }
-//                    }, new Response.ErrorListener() {
-//                        @Override
-//                        public void onErrorResponse(VolleyError error) {
-//
-//                            Log.e(TAG, "onErrorResponse: Error = " + error.getMessage());
-//
-//                            SimpleToast.error(getBaseContext(), "Server Error");
-//                        }
-//                    }) {
-//                        @Override
-//                        protected Map<String, String> getParams() throws AuthFailureError {
-//                            Map<String, String> params = new HashMap<>();
-//                            params.put(COUNTY_NAME, county);
-//                            params.put(GOVERNOR_NAME, governorName);
-//                            params.put(SENATOR_NAME, senatorName);
-//                            params.put(PRESIDENT_NAME, presidentName);
-//                            params.put(WOMAN_REP_NAME, womanRepName);
-//                            return params;
-//                        }
-//                    };
-//
-//                    AppController.getInstance().addToRequestQueue(request);
-//                } else {
-////    show Wireless Settings
-////            SimpleToast.warning(getBaseContext(),"Internet Connection Error");
-//                    showWirelessSettings();
-//                }
                 break;
         }
     }
