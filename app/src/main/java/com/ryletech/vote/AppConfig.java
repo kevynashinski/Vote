@@ -80,5 +80,6 @@ private static final String SERVER_URL = "http://192.168.58.1/orders/";
     public static final String LOGIN_URL = SERVER_URL + "auth.php";
     public static final String REGISTER_URL = SERVER_URL + "register.php";
     public static final String VOTE_URL = SERVER_URL + "vote.php";
+    public static final String DATA_URL = SERVER_URL + "data.php";
     public static final String USER_ACCOUNTS_URL = SERVER_URL + "user_account.php";
 }
