@@ -78,6 +78,7 @@ public final class AppConfig {
     public static final String WOMAN_REP_NAME = "woman_rep_name";
     //    preferences
     public static final String FIRST_RUN = "first_run";
+    public static final String VOTED = "voted";
 //    private static final String SERVER_URL = "https://orders-kevynashinski.c9users.io/";
 private static final String SERVER_URL = "http://192.168.58.1/opinionpolls/";
     //    private static final String SERVER_URL = "http://ecea9b2e.ngrok.io/orders/";

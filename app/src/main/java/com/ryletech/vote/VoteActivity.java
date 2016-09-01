@@ -46,6 +46,7 @@ import static com.ryletech.vote.AppConfig.PRESIDENT_NAME;
 import static com.ryletech.vote.AppConfig.SENATORS_URL;
 import static com.ryletech.vote.AppConfig.SENATOR_NAME;
 import static com.ryletech.vote.AppConfig.TAG;
+import static com.ryletech.vote.AppConfig.VOTED;
 import static com.ryletech.vote.AppConfig.VOTE_URL;
 import static com.ryletech.vote.AppConfig.WOMAN_REP_NAME;
 import static com.ryletech.vote.AppConfig.WOMEN_REPS_URL;
@@ -418,92 +419,99 @@ public class VoteActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.buttonSubmitVote:
 
-                new BottomSheet.Builder(this)
-                        .setTitle("Id Number Confirmation")
-                        .setMessage("Is this your id number: " + Prefs.getString(ID_NUMBER, ""))
-                        .setPositiveButton("Confirm & Vote")
-                        .setNegativeButton("Cancel")
-                        .setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_info))
-                        .setListener(new BottomSheetListener() {
-                            @Override
-                            public void onSheetShown(@NonNull BottomSheet bottomSheet) {
+                if (Prefs.getBoolean(VOTED, false)) {
+                    SimpleToast.info(getBaseContext(), "YOu can only vote once in a month,");
+                } else {
 
-                            }
+                    new BottomSheet.Builder(this)
+                            .setTitle("Id Number Confirmation")
+                            .setMessage("Is this your id number: " + Prefs.getString(ID_NUMBER, ""))
+                            .setPositiveButton("Confirm & Vote")
+                            .setNegativeButton("Cancel")
+                            .setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_info))
+                            .setListener(new BottomSheetListener() {
+                                @Override
+                                public void onSheetShown(@NonNull BottomSheet bottomSheet) {
 
-                            @Override
-                            public void onSheetItemSelected(@NonNull BottomSheet bottomSheet, MenuItem menuItem) {
+                                }
 
-                            }
+                                @Override
+                                public void onSheetItemSelected(@NonNull BottomSheet bottomSheet, MenuItem menuItem) {
 
-                            @Override
-                            public void onSheetDismissed(@NonNull BottomSheet bottomSheet, @DismissEvent int i) {
-                                switch (i) {
-                                    case DISMISS_EVENT_BUTTON_POSITIVE:
+                                }
 
-                                        final String county, presidentName, senatorName, governorName, womanRepName;
+                                @Override
+                                public void onSheetDismissed(@NonNull BottomSheet bottomSheet, @DismissEvent int i) {
+                                    switch (i) {
+                                        case DISMISS_EVENT_BUTTON_POSITIVE:
 
-                                        county = spinnerCounties.getSelectedItem().toString();
-                                        presidentName = spinnerPresident.getSelectedItem().toString();
-                                        governorName = spinnerGovernor.getSelectedItem().toString();
-                                        senatorName = spinnerSenator.getSelectedItem().toString();
-                                        womanRepName = spinnerWomenRep.getSelectedItem().toString();
+                                            final String county, presidentName, senatorName, governorName, womanRepName;
 
-                                        if (new InternetConnection(getBaseContext()).isInternetAvailable()) {
+                                            county = spinnerCounties.getSelectedItem().toString();
+                                            presidentName = spinnerPresident.getSelectedItem().toString();
+                                            governorName = spinnerGovernor.getSelectedItem().toString();
+                                            senatorName = spinnerSenator.getSelectedItem().toString();
+                                            womanRepName = spinnerWomenRep.getSelectedItem().toString();
 
-                                            showProgress(true);
-                                            StringRequest request = new StringRequest(Request.Method.POST, VOTE_URL, new Response.Listener<String>() {
-                                                @Override
-                                                public void onResponse(String response) {
-                                                    Log.i(TAG, "onResponse: Response= " + response);
+                                            if (new InternetConnection(getBaseContext()).isInternetAvailable()) {
 
-                                                    showProgress(false);
-                                                    switch (response) {
-                                                        case "0":
-                                                            SimpleToast.ok(getBaseContext(), "Cast vote success");
-                                                            break;
-                                                        case "1":
-                                                            SimpleToast.warning(getBaseContext(), "Error while casting your vote");
-                                                            break;
-                                                        case "3":
-                                                            SimpleToast.error(getBaseContext(), "Server Error, try again");
-                                                            break;
+                                                showProgress(true);
+                                                StringRequest request = new StringRequest(Request.Method.POST, VOTE_URL, new Response.Listener<String>() {
+                                                    @Override
+                                                    public void onResponse(String response) {
+                                                        Log.i(TAG, "onResponse: Response= " + response);
+
+                                                        showProgress(false);
+                                                        switch (response) {
+                                                            case "0":
+                                                                SimpleToast.ok(getBaseContext(), "Cast vote success");
+
+                                                                finish();
+                                                                break;
+                                                            case "1":
+                                                                SimpleToast.warning(getBaseContext(), "Error while casting your vote");
+                                                                break;
+                                                            case "3":
+                                                                SimpleToast.error(getBaseContext(), "Server Error, try again");
+                                                                break;
+                                                        }
+
                                                     }
+                                                }, new Response.ErrorListener() {
+                                                    @Override
+                                                    public void onErrorResponse(VolleyError error) {
 
-                                                }
-                                            }, new Response.ErrorListener() {
-                                                @Override
-                                                public void onErrorResponse(VolleyError error) {
+                                                        showProgress(false);
+                                                        Log.e(TAG, "onErrorResponse: Error = " + error.getMessage());
 
-                                                    showProgress(false);
-                                                    Log.e(TAG, "onErrorResponse: Error = " + error.getMessage());
+                                                        SimpleToast.error(getBaseContext(), "Network Failure, try again");
+                                                    }
+                                                }) {
+                                                    @Override
+                                                    protected Map<String, String> getParams() throws AuthFailureError {
+                                                        Map<String, String> params = new HashMap<>();
+                                                        params.put(COUNTY_NAME, county);
+                                                        params.put(GOVERNOR_NAME, governorName);
+                                                        params.put(SENATOR_NAME, senatorName);
+                                                        params.put(PRESIDENT_NAME, presidentName);
+                                                        params.put(WOMAN_REP_NAME, womanRepName);
+                                                        return params;
+                                                    }
+                                                };
 
-                                                    SimpleToast.error(getBaseContext(), "Network Failure, try again");
-                                                }
-                                            }) {
-                                                @Override
-                                                protected Map<String, String> getParams() throws AuthFailureError {
-                                                    Map<String, String> params = new HashMap<>();
-                                                    params.put(COUNTY_NAME, county);
-                                                    params.put(GOVERNOR_NAME, governorName);
-                                                    params.put(SENATOR_NAME, senatorName);
-                                                    params.put(PRESIDENT_NAME, presidentName);
-                                                    params.put(WOMAN_REP_NAME, womanRepName);
-                                                    return params;
-                                                }
-                                            };
-
-                                            AppController.getInstance().addToRequestQueue(request);
-                                        } else {
+                                                AppController.getInstance().addToRequestQueue(request);
+                                            } else {
 //    show Wireless Settings
 //            SimpleToast.warning(getBaseContext(),"Internet Connection Error");
-                                            showWirelessSettings();
-                                        }
-                                        break;
+                                                showWirelessSettings();
+                                            }
+                                            break;
+                                    }
                                 }
-                            }
-                        })
-                        .show();
-                break;
+                            })
+                            .show();
+                    break;
+                }
         }
     }
 
